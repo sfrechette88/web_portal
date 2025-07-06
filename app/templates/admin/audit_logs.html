@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Journaux de sécurité</h2>
+        <p>Consultez les activités des utilisateurs et les événements de sécurité.</p>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Filtres</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('admin.audit_logs') }}">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="action" class="form-label">Action</label>
+                            <select name="action" id="action" class="form-select">
+                                <option value="">Toutes les actions</option>
+                                {% for action_option in actions %}
+                                <option value="{{ action_option }}" {% if current_filters.action == action_option %}selected{% endif %}>{{ action_option }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label for="username" class="form-label">Utilisateur</label>
+                            <select name="username" id="username" class="form-select">
+                                <option value="">Tous les utilisateurs</option>
+                                {% for username_option in usernames %}
+                                <option value="{{ username_option }}" {% if current_filters.username == username_option %}selected{% endif %}>{{ username_option }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label for="from_date" class="form-label">Date de début</label>
+                            <input type="date" name="from_date" id="from_date" class="form-control" value="{{ current_filters.from_date }}">
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            <label for="to_date" class="form-label">Date de fin</label>
+                            <input type="date" name="to_date" id="to_date" class="form-control" value="{{ current_filters.to_date }}">
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">Filtrer</button>
+                        <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-outline-secondary">Réinitialiser les filtres</a>
+                        
+                        <a href="{{ url_for('admin.export_audit_logs', 
+                                action=current_filters.action, 
+                                username=current_filters.username,
+                                from_date=current_filters.from_date,
+                                to_date=current_filters.to_date) }}" 
+                           class="btn btn-success">
+                            Exporter CSV
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date/Heure</th>
+                                <th>Utilisateur</th>
+                                <th>Action</th>
+                                <th>Ressource</th>
+                                <th>IP</th>
+                                <th>Détails</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs.items %}
+                            <tr>
+                                <td>{{ log.timestamp.strftime('%d/%m/%Y %H:%M:%S') }}</td>
+                                <td>{{ log.username or 'Anonyme' }}</td>
+                                <td>
+                                    {% if log.action == 'login_success' %}
+                                    <span class="badge bg-success">Connexion</span>
+                                    {% elif log.action == 'login_failed' %}
+                                    <span class="badge bg-danger">Échec connexion</span>
+                                    {% elif log.action == 'logout' %}
+                                    <span class="badge bg-secondary">Déconnexion</span>
+                                    {% elif log.action == 'create' %}
+                                    <span class="badge bg-primary">Création</span>
+                                    {% elif log.action == 'update' %}
+                                    <span class="badge bg-info">Modification</span>
+                                    {% elif log.action == 'delete' %}
+                                    <span class="badge bg-warning">Suppression</span>
+                                    {% elif log.action == 'approve' %}
+                                    <span class="badge bg-success">Approbation</span>
+                                    {% elif log.action == 'reject' %}
+                                    <span class="badge bg-danger">Rejet</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ log.action }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ log.resource }}
+                                    {% if log.resource_id %}
+                                    <small class="text-muted">#{{ log.resource_id }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>{{ log.ip_address or '-' }}</td>
+                                <td>
+                                    {% if log.details %}
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#detailsModal{{ log.id }}">
+                                        Voir détails
+                                    </button>
+                                    
+                                    <!-- Modal pour les détails -->
+                                    <div class="modal fade" id="detailsModal{{ log.id }}" tabindex="-1" aria-labelledby="detailsModalLabel{{ log.id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="detailsModalLabel{{ log.id }}">Détails du log #{{ log.id }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <h6>Date/Heure:</h6>
+                                                        <p>{{ log.timestamp.strftime('%d/%m/%Y %H:%M:%S') }}</p>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <h6>Utilisateur:</h6>
+                                                        <p>{{ log.username or 'Anonyme' }}</p>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <h6>Action:</h6>
+                                                        <p>{{ log.action }}</p>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <h6>Ressource:</h6>
+                                                        <p>{{ log.resource }} {% if log.resource_id %}#{{ log.resource_id }}{% endif %}</p>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <h6>Adresse IP:</h6>
+                                                        <p>{{ log.ip_address or '-' }}</p>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <h6>Agent utilisateur:</h6>
+                                                        <p class="text-muted small">{{ log.user_agent or '-' }}</p>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <h6>Détails:</h6>
+                                                        <pre>{{ log.details }}</pre>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                {% if logs.items %}
+                <div class="d-flex justify-content-center mt-4">
+                    <nav aria-label="Pagination des journaux">
+                        <ul class="pagination">
+                            {% if logs.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.audit_logs', page=logs.prev_num, action=current_filters.action, username=current_filters.username, from_date=current_filters.from_date, to_date=current_filters.to_date) }}">Précédent</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Précédent</span>
+                            </li>
+                            {% endif %}
+                            
+                            {% for page_num in logs.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                                {% if page_num %}
+                                    {% if page_num == logs.page %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('admin.audit_logs', page=page_num, action=current_filters.action, username=current_filters.username, from_date=current_filters.from_date, to_date=current_filters.to_date) }}">{{ page_num }}</a>
+                                    </li>
+                                    {% endif %}
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if logs.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.audit_logs', page=logs.next_num, action=current_filters.action, username=current_filters.username, from_date=current_filters.from_date, to_date=current_filters.to_date) }}">Suivant</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Suivant</span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% else %}
+                <div class="alert alert-info mt-3">
+                    Aucun journal d'audit trouvé avec les filtres actuels.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary">Retour au tableau de bord</a>
+    </div>
+</div>
+{% endblock %}

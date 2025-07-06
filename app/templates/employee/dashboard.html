@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Tableau de bord employé</h2>
+        <p>Bienvenue, {{ current_user.first_name }} {{ current_user.last_name }}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Actions rapides</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('employee.new_timesheet') }}" class="btn btn-primary">Saisir une nouvelle feuille de temps</a>
+                    <a href="{{ url_for('employee.list_timesheets') }}" class="btn btn-outline-primary">Consulter mon historique</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Feuilles de temps récentes</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_timesheets %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Heures</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for timesheet in recent_timesheets %}
+                            <tr>
+                                <td>{{ timesheet.date.strftime('%d/%m/%Y') }}</td>
+                                <td>{{ "%.2f"|format(timesheet.total_hours()) }}</td>
+                                <td>
+                                    {% if timesheet.status == 'submitted' %}
+                                    <span class="badge bg-warning">En attente</span>
+                                    {% elif timesheet.status == 'approved' %}
+                                    <span class="badge bg-success">Approuvé</span>
+                                    {% elif timesheet.status == 'rejected' %}
+                                    <span class="badge bg-danger">Rejeté</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p>Aucune feuille de temps récente.</p>
+                <a href="{{ url_for('employee.new_timesheet') }}" class="btn btn-primary">Créer votre première feuille de temps</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

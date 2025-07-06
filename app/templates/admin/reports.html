@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Rapports administratifs</h2>
+        <p>Consultez et générez différents types de rapports pour l'application.</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Rapport d'activité utilisateurs</h5>
+            </div>
+            <div class="card-body">
+                <p>Analyse de l'activité des utilisateurs sur la plateforme.</p>
+                <div class="d-grid">
+                    <a href="{{ url_for('admin.user_activity_report') }}" class="btn btn-primary">Générer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Rapport des heures globales</h5>
+            </div>
+            <div class="card-body">
+                <p>Récapitulatif des heures travaillées par tous les employés.</p>
+                <div class="d-grid">
+                    <a href="{{ url_for('admin.global_hours_report') }}" class="btn btn-primary">Générer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Audit du système</h5>
+            </div>
+            <div class="card-body">
+                <p>Rapport sur les événements système et les actions administratives.</p>
+                <div class="d-grid">
+                    <a href="{{ url_for('admin.system_audit_report') }}" class="btn btn-primary">Générer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Export de données</h5>
+            </div>
+            <div class="card-body">
+                <p>Exportez les données de l'application dans différents formats pour analyse ou sauvegarde.</p>
+                
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>Export des utilisateurs</h5>
+                                <div class="btn-group mt-2">
+                                    <a href="{{ url_for('admin.export_users', format='csv') }}" class="btn btn-sm btn-outline-primary">CSV</a>
+                                    <a href="{{ url_for('admin.export_users', format='json') }}" class="btn btn-sm btn-outline-primary">JSON</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>Export des feuilles de temps</h5>
+                                <div class="btn-group mt-2">
+                                    <a href="{{ url_for('admin.export_timesheets', format='csv') }}" class="btn btn-sm btn-outline-primary">CSV</a>
+                                    <a href="{{ url_for('admin.export_timesheets', format='json') }}" class="btn btn-sm btn-outline-primary">JSON</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>Export complet</h5>
+                                <div class="btn-group mt-2">
+                                    <a href="{{ url_for('admin.export_complete', format='csv') }}" class="btn btn-sm btn-outline-primary">CSV</a>
+                                    <a href="{{ url_for('admin.export_complete', format='json') }}" class="btn btn-sm btn-outline-primary">JSON</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary">Retour au tableau de bord</a>
+    </div>
+</div>
+{% endblock %}

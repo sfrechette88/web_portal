@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Confirmation de suppression</h5>
+            </div>
+            <div class="card-body">
+                <p>Êtes-vous sûr de vouloir supprimer l'utilisateur suivant ?</p>
+                
+                <div class="alert alert-warning">
+                    <h5>{{ user.first_name }} {{ user.last_name }}</h5>
+                    <p>Nom d'utilisateur : <strong>{{ user.username }}</strong></p>
+                    <p>Email : <strong>{{ user.email }}</strong></p>
+                    <p>Rôle : <strong>{{ user.role }}</strong></p>
+                </div>
+                
+                <p class="text-danger"><strong>Attention :</strong> Cette action est irréversible et supprimera toutes les feuilles de temps associées à cet utilisateur.</p>
+                
+                <form method="POST" action="{{ url_for('admin.delete_user', id=user.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+                        <a href="{{ url_for('admin.user_list') }}" class="btn btn-outline-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

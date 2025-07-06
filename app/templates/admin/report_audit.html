@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Rapport d'audit système</h2>
+        <p>Généré le {{ timestamp.strftime('%d/%m/%Y à %H:%M') }}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Utilisateurs</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Total utilisateurs</th>
+                            <td>{{ user_stats.total }}</td>
+                        </tr>
+                        <tr>
+                            <th>Administrateurs</th>
+                            <td>{{ user_stats.by_role.admin }}</td>
+                        </tr>
+                        <tr>
+                            <th>Managers</th>
+                            <td>{{ user_stats.by_role.manager }}</td>
+                        </tr>
+                        <tr>
+                            <th>Employés</th>
+                            <td>{{ user_stats.by_role.employee }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Feuilles de temps</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Total feuilles</th>
+                            <td>{{ timesheet_stats.total }}</td>
+                        </tr>
+                        <tr>
+                            <th>En attente</th>
+                            <td>{{ timesheet_stats.pending }}</td>
+                        </tr>
+                        <tr>
+                            <th>Approuvées</th>
+                            <td>{{ timesheet_stats.approved }}</td>
+                        </tr>
+                        <tr>
+                            <th>Rejetées</th>
+                            <td>{{ timesheet_stats.rejected }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <a href="{{ url_for('admin.reports') }}" class="btn btn-primary">Retour aux rapports</a>
+        <button class="btn btn-success" onclick="window.print()">Imprimer ce rapport</button>
+    </div>
+</div>
+{% endblock %}

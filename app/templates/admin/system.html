@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Informations système</h2>
+        <p>Visualisez les détails techniques de l'application TimePortal.</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Environnement</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Système d'exploitation</th>
+                            <td>{{ system_info.os }}</td>
+                        </tr>
+                        <tr>
+                            <th>Version Python</th>
+                            <td>{{ system_info.python_version }}</td>
+                        </tr>
+                        <tr>
+                            <th>Type de base de données</th>
+                            <td>{{ system_info.db_type }}</td>
+                        </tr>
+                        <tr>
+                            <th>Version base de données</th>
+                            <td>{{ system_info.db_version }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Tables de la base de données</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for table in tables %}
+                    <li class="list-group-item">{{ table }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Variables d'environnement</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Variable</th>
+                                <th>Valeur</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for key, value in env_vars.items() %}
+                            <tr>
+                                <td>{{ key }}</td>
+                                <td>{{ value }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Actions système</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="#" class="btn btn-warning">Vider le cache</a>
+                    <a href="#" class="btn btn-info">Sauvegarder la base de données</a>
+                    <a href="#" class="btn btn-secondary">Vérifier les mises à jour</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary">Retour au tableau de bord</a>
+    </div>
+</div>
+{% endblock %}

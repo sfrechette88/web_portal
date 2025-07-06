@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Rapport des heures - {{ month }}</h2>
+        <p>Vue d'ensemble des heures travaillées par employé pour le mois en cours.</p>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                {% if employee_hours %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Employé</th>
+                                <th>Heures approuvées</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for employee in employee_hours %}
+                            <tr>
+                                <td>{{ employee.first_name }} {{ employee.last_name }}</td>
+                                <td>{{ "%.2f"|format(employee.total_hours) }}</td>
+                                <td>
+                                    <a href="{{ url_for('manager.view_employee_timesheets', id=employee.id) }}" class="btn btn-sm btn-primary">Voir les détails</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-primary">
+                                <th>Total</th>
+                                <th>{{ "%.2f"|format(total_all_hours) }}</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-8 offset-md-2">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                Répartition des heures
+                            </div>
+                            <div class="card-body">
+                                <div id="hours-chart" style="height: 300px;">
+                                    <!-- Ici, tu pourrais ajouter un graphique avec Chart.js si tu veux -->
+                                    <!-- Pour l'instant, on utilise une représentation visuelle simple -->
+                                    {% for employee in employee_hours %}
+                                    <div class="mb-3">
+                                        <label>{{ employee.first_name }} {{ employee.last_name }}</label>
+                                        <div class="progress">
+                                            {% set percentage = (employee.total_hours / total_all_hours * 100) if total_all_hours > 0 else 0 %}
+                                            <div class="progress-bar" role="progressbar" style="width: {{ percentage }}%;" aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100">{{ "%.1f"|format(percentage) }}%</div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% else %}
+                <div class="alert alert-info">
+                    Aucune donnée disponible pour ce mois. Les employés n'ont pas encore soumis de feuilles de temps approuvées.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <a href="{{ url_for('manager.dashboard') }}" class="btn btn-primary">Retour au tableau de bord</a>
+        {% if employee_hours %}
+        <button class="btn btn-success" onclick="window.print()">Imprimer ce rapport</button>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

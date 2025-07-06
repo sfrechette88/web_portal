@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>{% if is_edit %}Modifier{% else %}Nouvelle{% endif %} feuille de temps</h2>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">{% if is_edit %}Modification{% else %}Saisie{% endif %} du temps de travail</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('employee.edit_timesheet', id=timesheet.id) if is_edit else url_for('employee.new_timesheet') }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.date.label(class="form-label") }}
+                        {{ form.date(class="form-control", type="date") }}
+                        {% for error in form.date.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            {{ form.start_time.label(class="form-label") }}
+                            {{ form.start_time(class="form-control", type="time") }}
+                            {% for error in form.start_time.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.end_time.label(class="form-label") }}
+                            {{ form.end_time(class="form-control", type="time") }}
+                            {% for error in form.end_time.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.break_duration.label(class="form-label") }}
+                        {{ form.break_duration(class="form-control") }}
+                        <div class="form-text">Durée de pause en minutes (ex: 30 pour 30 minutes)</div>
+                        {% for error in form.break_duration.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control", rows=3) }}
+                        <div class="form-text">Description des tâches effectuées (optionnel)</div>
+                        {% for error in form.description.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary", value="Mettre à jour" if is_edit else "Enregistrer") }}
+                        <a href="{{ url_for('employee.list_timesheets') if is_edit else url_for('employee.dashboard') }}" class="btn btn-outline-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

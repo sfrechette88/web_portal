@@ -1,0 +1,34 @@
+@import url("palette.css");
+
+body {
+  background-color: var(--couleur-fond);
+  color: var(--couleur-texte);
+}
+
+.navbar {
+    margin-bottom: 20px;
+}
+
+.card {
+    border: 1px solid var(--couleur-principale);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    font-weight: 500;
+}
+
+.display-4 {
+    font-weight: 600;
+    color: var(--couleur-principale);
+}
+/* Boutons */
+.btn-primary {
+  background-color: var(--couleur-principale);
+  border-color: var(--couleur-principale);
+}
+
+.btn-primary:hover {
+  background-color: var(--couleur-accent);
+  border-color: var(--couleur-accent);
+}

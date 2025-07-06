@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Liste des employés</h2>
+        <p>Vue d'ensemble de tous les employés enregistrés dans le système.</p>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                {% if employee_stats %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Nombre de feuilles ce mois</th>
+                                <th>Heures totales ce mois</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in employee_stats %}
+                            <tr>
+                                <td>{{ stat.employee.id }}</td>
+                                <td>{{ stat.employee.first_name }} {{ stat.employee.last_name }}</td>
+                                <td>{{ stat.employee.email }}</td>
+                                <td>{{ stat.timesheet_count }}</td>
+                                <td>{{ "%.2f"|format(stat.total_hours) }}</td>
+                                <td>
+                                    <a href="{{ url_for('manager.view_employee_timesheets', id=stat.employee.id) }}" class="btn btn-sm btn-primary">Voir les feuilles de temps</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    Aucun employé n'est enregistré dans le système.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <a href="{{ url_for('manager.dashboard') }}" class="btn btn-primary">Retour au tableau de bord</a>
+    </div>
+</div>
+{% endblock %}

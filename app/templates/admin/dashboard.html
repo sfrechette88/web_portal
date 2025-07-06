@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Tableau de bord administrateur</h2>
+        <p>Bienvenue, {{ current_user.first_name }} {{ current_user.last_name }}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card text-center mb-4">
+            <div class="card-body">
+                <h1 class="display-4">{{ employee_count }}</h1>
+                <p class="card-text">Employés</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center mb-4">
+            <div class="card-body">
+                <h1 class="display-4">{{ manager_count }}</h1>
+                <p class="card-text">Managers</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center mb-4">
+            <div class="card-body">
+                <h1 class="display-4">{{ admin_count }}</h1>
+                <p class="card-text">Administrateurs</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center mb-4">
+            <div class="card-body">
+                <h1 class="display-4">{{ pending_timesheets }}</h1>
+                <p class="card-text">Feuilles en attente</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Statistiques des feuilles de temps</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th>Total des feuilles</th>
+                                <td>{{ total_timesheets }}</td>
+                            </tr>
+                            <tr>
+                                <th>En attente</th>
+                                <td>{{ pending_timesheets }}</td>
+                            </tr>
+                            <tr>
+                                <th>Approuvées</th>
+                                <td>{{ approved_timesheets }}</td>
+                            </tr>
+                            <tr>
+                                <th>Rejetées</th>
+                                <td>{{ rejected_timesheets }}</td>
+                            </tr>
+                            <tr>
+                                <th>Heures totales ce mois</th>
+                                <td>{{ "%.2f"|format(total_hours) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Actions rapides</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('admin.user_list') }}" class="btn btn-primary">Gérer les utilisateurs</a>
+                    <a href="{{ url_for('admin.create_user') }}" class="btn btn-success">Créer un utilisateur</a>
+                    <a href="{{ url_for('admin.reports') }}" class="btn btn-info">Consulter les rapports</a>
+                    <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-warning">Journaux de sécurité</a>
+                    <a href="{{ url_for('admin.system') }}" class="btn btn-secondary">Informations système</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Rapport des heures globales</h2>
+        <p>Période : {{ first_day.strftime('%d/%m/%Y') }} - {{ last_day.strftime('%d/%m/%Y') }}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Heures par jour</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Heures</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for day, hours in days %}
+                            <tr>
+                                <td>{{ day }}</td>
+                                <td>{{ "%.2f"|format(hours) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-primary">
+                                <th>Total</th>
+                                <th>{{ "%.2f"|format(total_hours) }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Répartition par rôle</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Rôle</th>
+                                <th>Heures</th>
+                                <th>Pourcentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for role, hours in role_hours.items() %}
+                            <tr>
+                                <td>
+                                    {% if role == 'admin' %}
+                                    <span class="badge bg-danger">Admin</span>
+                                    {% elif role == 'manager' %}
+                                    <span class="badge bg-warning">Manager</span>
+                                    {% else %}
+                                    <span class="badge bg-info">Employé</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ "%.2f"|format(hours) }}</td>
+                                <td>{{ "%.1f"|format(hours / total_hours * 100 if total_hours > 0 else 0) }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-4">
+                    <h6>Visualisation</h6>
+                    {% for role, hours in role_hours.items() %}
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between">
+                            <span>{{ role }}</span>
+                            <span>{{ "%.2f"|format(hours) }} heures</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar {% if role == 'admin' %}bg-danger{% elif role == 'manager' %}bg-warning{% else %}bg-info{% endif %}" 
+                                role="progressbar" 
+                                style="width: {{ hours / total_hours * 100 if total_hours > 0 else 0 }}%;">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <a href="{{ url_for('admin.reports') }}" class="btn btn-primary">Retour aux rapports</a>
+        <button class="btn btn-success" onclick="window.print()">Imprimer ce rapport</button>
+    </div>
+</div>
+{% endblock %}

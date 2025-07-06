@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Rapport d'activité utilisateurs</h2>
+        <p>Période : {{ start_date.strftime('%d/%m/%Y') }} - {{ end_date.strftime('%d/%m/%Y') }}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Utilisateur</th>
+                                <th>Rôle</th>
+                                <th>Feuilles soumises</th>
+                                <th>Heures totales</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in user_data %}
+                            <tr>
+                                <td>{{ user.full_name }}</td>
+                                <td>
+                                    {% if user.role == 'admin' %}
+                                    <span class="badge bg-danger">Admin</span>
+                                    {% elif user.role == 'manager' %}
+                                    <span class="badge bg-warning">Manager</span>
+                                    {% else %}
+                                    <span class="badge bg-info">Employé</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user.submitted_count }}</td>
+                                <td>{{ "%.2f"|format(user.total_hours) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <a href="{{ url_for('admin.reports') }}" class="btn btn-primary">Retour aux rapports</a>
+        <button class="btn btn-success" onclick="window.print()">Imprimer ce rapport</button>
+    </div>
+</div>
+{% endblock %}

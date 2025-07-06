@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Tableau de bord gestionnaire</h2>
+        <p>Bienvenue, {{ current_user.first_name }} {{ current_user.last_name }}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-center mb-4">
+            <div class="card-body">
+                <h1 class="display-4">{{ employee_count }}</h1>
+                <p class="card-text">Employés actifs</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-center mb-4">
+            <div class="card-body">
+                <h1 class="display-4">{{ pending_count }}</h1>
+                <p class="card-text">Feuilles en attente</p>
+                {% if pending_count > 0 %}
+                <a href="{{ url_for('manager.pending_timesheets') }}" class="btn btn-primary">Voir les feuilles</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-center mb-4">
+            <div class="card-body">
+                <h1 class="display-4">{{ "%.1f"|format(total_hours) }}</h1>
+                <p class="card-text">Heures totales du mois</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Actions rapides</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('manager.pending_timesheets') }}" class="btn btn-primary">Valider les feuilles de temps</a>
+                    <a href="{{ url_for('manager.employee_list') }}" class="btn btn-outline-primary">Consulter les employés</a>
+                    <a href="{{ url_for('manager.hours_report') }}" class="btn btn-outline-primary">Générer un rapport d'heures</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Statistiques du mois</h5>
+            </div>
+            <div class="card-body">
+                <p>Mois en cours: <strong>{{ now.strftime('%B %Y') }}</strong></p>
+                
+                <div class="progress mb-3">
+                    <div class="progress-bar" role="progressbar" style="width: 75%;" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">75%</div>
+                </div>
+                
+                <p class="text-muted">Comparaison avec le mois précédent: <span class="text-success">+10%</span></p>
+
+                <a href="{{ url_for('manager.hours_report') }}" class="btn btn-outline-primary">Voir le rapport détaillé</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

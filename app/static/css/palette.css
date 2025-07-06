@@ -1,0 +1,11 @@
+:root {
+  --couleur-principale: #007bff;       /* Bleu par défaut Bootstrap */
+  --couleur-secondaire: #6c757d;       /* Gris secondaire */
+  --couleur-fond: #f8f9fa;             /* Gris très pâle */
+  --couleur-texte: #212529;            /* Texte principal */
+  --couleur-accent: #17a2b8;           /* Bleu-vert accent */
+  --couleur-erreur: #dc3545;           /* Rouge */
+  --couleur-succes: #28a745;           /* Vert */
+
+  /* Ajoute ici tes couleurs personnalisées d'entreprise au besoin */
+}
