@@ -6,6 +6,7 @@ from app.util import login_required, role_required
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from app.utils.audit import log_audit
+from werkzeug.security import generate_password_hash
 
 manager_bp = Blueprint('manager', __name__, url_prefix='/manager')
 
@@ -198,3 +199,50 @@ def view_employee_timesheets(id):
                           current_user=user,
                           employee=employee,
                           timesheets=timesheets)
+
+@manager_bp.route('/employee/add', methods=['GET', 'POST'])
+@role_required('manager')
+def add_employee():
+    user = User.query.get(session['user_id'])
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        password = request.form.get('password')
+
+        role = request.form.get('role')
+        employee_type = request.form.get('employee_type')
+
+        # Vérifications simples (à peaufiner pour la prod)
+        if not all([username, email, first_name, last_name, password]):
+            flash('Tous les champs sont obligatoires.', 'danger')
+            return redirect(url_for('manager.add_employee'))
+
+        if User.query.filter_by(username=username).first():
+            flash('Nom d’utilisateur déjà utilisé.', 'danger')
+            return redirect(url_for('manager.add_employee'))
+
+        if User.query.filter_by(email=email).first():
+            flash('Courriel déjà utilisé.', 'danger')
+            return redirect(url_for('manager.add_employee'))
+
+        new_user = User(
+            username=username,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            role='employee'
+        )
+        new_user.password_hash = generate_password_hash(password)
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash('Employé ajouté avec succès!', 'success')
+        return redirect(url_for('manager.employee_list'))
+
+    return render_template(
+        'manager/add_employee.html',
+        title='Ajouter un employé',
+        current_user=user
+        )

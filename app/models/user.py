@@ -10,6 +10,7 @@ class User(db.Model):
     first_name = db.Column(db.String(64))
     last_name = db.Column(db.String(64))
     role = db.Column(db.String(20))  # 'employee' ou 'manager'
+    employee_type = db.Column(db.String(20), default='regulier')  # 'regulier' ou 'hebdomadaire'
     
     # Relation avec les feuilles de temps (un utilisateur peut avoir plusieurs feuilles de temps)
     timesheets = db.relationship('Timesheet', backref='user', lazy='dynamic',

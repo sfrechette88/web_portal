@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Ajouter un employé</h1>
+<form method="POST">
+  <div class="mb-3">
+    <label for="username" class="form-label">Nom d’utilisateur</label>
+    <input type="text" class="form-control" id="username" name="username" required>
+  </div>
+  <div class="mb-3">
+    <label for="email" class="form-label">Courriel</label>
+    <input type="email" class="form-control" id="email" name="email" required>
+  </div>
+  <div class="mb-3">
+    <label for="first_name" class="form-label">Prénom</label>
+    <input type="text" class="form-control" id="first_name" name="first_name" required>
+  </div>
+  <div class="mb-3">
+    <label for="last_name" class="form-label">Nom</label>
+    <input type="text" class="form-control" id="last_name" name="last_name" required>
+  </div>
+  <div class="mb-3">
+    <label for="password" class="form-label">Mot de passe initial</label>
+    <input type="password" class="form-control" id="password" name="password" required>
+  </div>
+    <div class="mb-3">
+    <label for="role" class="form-label">Rôle</label>
+    <select class="form-control" id="role" name="role" required>
+      <option value="employee" selected>Employé</option>
+      <option value="manager">Gestionnaire</option>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="employee_type" class="form-label">Type de salarié</label>
+    <select class="form-control" id="employee_type" name="employee_type" required>
+      <option value="regulier" selected>Salarié régulier</option>
+      <option value="hebdomadaire">Salarié hebdomadaire</option>
+    </select>
+  </div>
+  <button type="submit" class="btn btn-success">Ajouter l’employé</button>
+</form>
+{% endblock %}
