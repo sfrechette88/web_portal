@@ -1,5 +1,9 @@
 @import url("palette.css");
 
+html {
+  overflow-y: scroll;
+}
+
 body {
   background-color: var(--couleur-fond);
   color: var(--couleur-texte);

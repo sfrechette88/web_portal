@@ -42,11 +42,13 @@ def dashboard():
 @manager_bp.route('/timesheets/pending')
 @role_required('manager')
 def pending_timesheets():
+    user = User.query.get(session['user_id'])
     # Récupérer toutes les feuilles de temps en attente
     timesheets = Timesheet.query.filter_by(status='submitted').order_by(Timesheet.date.desc()).all()
     
     return render_template('manager/pending_timesheets.html', 
-                          title='Feuilles de temps en attente', 
+                          title='Feuilles de temps en attente',
+                          current_user=user, 
                           timesheets=timesheets)
 
 @manager_bp.route('/timesheet/<int:id>/approve')
