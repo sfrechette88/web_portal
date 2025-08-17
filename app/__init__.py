@@ -48,6 +48,7 @@ def create_app(config_class=Config):
     # 🔥 ENREGISTREMENT DU FILTRE ICI
     app.jinja_env.filters['date_fr_court'] = date_fr_court
     app.jinja_env.filters['jour_fr'] = jour_fr
+    app.jinja_env.filters['datetime_local'] = datetime_local
     
     return app
 
