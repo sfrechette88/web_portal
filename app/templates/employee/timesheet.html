@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center my-3">
+    <div class="col-auto">
+      <a href="{{ url_for('employee.timesheet', period=prev_period) }}" class="btn btn-outline-secondary">&lt;--</a>
+    </div>
+    <div class="col text-center">
+      <h4>Période {{ period_num }}</h4>
+      <div>Semaine du {{ week_start|date_fr_court }} au {{ week_end|date_fr_court }}</div>
+    </div>
+    <div class="col-auto">
+      <a href="{{ url_for('employee.timesheet', period=next_period) }}" class="btn btn-outline-secondary">--&gt;</a>
+    </div>
+  </div>
+  <form method="POST">
+    {% for week in weeks %}
+      <table class="table table-bordered mb-4">
+        <tr>
+          {% for day in week %}
+            <th class="text-center">
+                {{ day|jour_fr }}<br>
+                {{ day|date_fr_court }}
+            </th>
+          {% endfor %}
+        </tr>
+        <tr>
+          {% for day in week %}
+            <td {% if readonly %}class="bg-light text-muted"{% endif %}>
+            <div>
+                Début :
+                <input type="time" name="start_{{ day }}" value="{{ timesheet_data[day].start_time if timesheet_data[day] and timesheet_data[day].start_time else '' }}" {% if readonly %}readonly disabled{% endif %}><br>
+                Fin :
+                <input type="time" name="end_{{ day }}" value="{{ timesheet_data[day].end_time if timesheet_data[day] and timesheet_data[day].end_time else '' }}" {% if readonly %}readonly disabled{% endif %}><br>
+                Code :
+                <select name="code_{{ day }}" {% if readonly %}disabled{% endif %}>
+                {% for code in codes %}
+                    <option value="{{ code.id }}"
+                        {% if timesheet_data[day] and timesheet_data[day].code_id == code.id %}selected{% endif %}>
+                    {{ code.nom }}
+                    </option>
+                {% endfor %}
+                </select>
+                <br>
+                <!-- Modificateurs, à compléter plus tard -->
+                <div id="modifiers_{{ day }}">
+                <!-- Option JS pour ajout dynamique -->
+                </div>
+                {% if not readonly %}
+                <button type="button" class="btn btn-sm btn-outline-secondary add-modifier" data-day="{{ day }}">+</button>
+                {% endif %}
+            </div>
+            </td>
+
+          {% endfor %}
+        </tr>
+      </table>
+    {% endfor %}
+    <div class="mb-4">
+      <label for="remark">Remarque sur la période :</label>
+      <textarea class="form-control" id="remark" name="remark" {% if readonly %}readonly disabled{% endif %}></textarea>
+    </div>
+    {% if not readonly %}
+      <button type="submit" class="btn btn-success">Enregistrer</button>
+    {% endif %}
+  </form>
+</div>
+
+<!-- JS pour ajout dynamique de modificateurs -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelectorAll('.add-modifier').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const day = btn.dataset.day;
+      const container = document.getElementById('modifiers_' + day);
+      const select = document.createElement('select');
+      select.name = 'mods_' + day + '[]';
+      select.className = 'form-select my-1';
+      {% for mod in modifiers %}
+        var option = document.createElement('option');
+        option.value = '{{ mod.id }}';
+        option.text = '{{ mod.nom }}';
+        select.appendChild(option);
+      {% endfor %}
+      container.appendChild(select);
+    });
+  });
+});
+</script>
+{% endblock %}

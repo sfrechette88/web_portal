@@ -6,10 +6,21 @@ from app.util import login_required, role_required
 from flask_wtf import FlaskForm
 from wtforms import DateField, TimeField, IntegerField, StringField, SubmitField
 from wtforms.validators import DataRequired, Optional, NumberRange, Length
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from app.utils.audit import log_audit
+from app.models.code import Code, Modifier
 
 employee_bp = Blueprint('employee', __name__, url_prefix='/employee')
+
+def get_period_dates(period_num, year):
+    # Tu dois adapter le calcul du début de la première période selon ton année fiscale !
+    # Ici, on considère que la première période commence le lundi de la 1re semaine de l'année.
+    start_of_year = date(year, 1, 1)
+    while start_of_year.weekday() != 0:  # 0 = lundi
+        start_of_year += timedelta(days=1)
+    start = start_of_year + timedelta(weeks=(period_num - 1) * 2)
+    days = [start + timedelta(days=i) for i in range(14)]
+    return days
 
 class TimesheetForm(FlaskForm):
     date = DateField('Date', validators=[DataRequired()], default=date.today)
@@ -32,114 +43,80 @@ def dashboard():
                           current_user=user,
                           recent_timesheets=recent_timesheets)
 
-@employee_bp.route('/timesheet/new', methods=['GET', 'POST'])
+
+@employee_bp.route('/timesheet', methods=['GET', 'POST'])
 @role_required('employee')
-def new_timesheet():
+def timesheet():
     user = User.query.get(session['user_id'])
-    form = TimesheetForm()
-    
-    if form.validate_on_submit():
-        timesheet = Timesheet(
-            user_id=user.id,
-            date=form.date.data,
-            start_time=form.start_time.data,
-            end_time=form.end_time.data,
-            break_duration=form.break_duration.data,
-            description=form.description.data
-        )
-        db.session.add(timesheet)
+    year = date.today().year
+
+    # Période courante par défaut
+    period = request.args.get('period', type=int)
+    if not period:
+        today = date.today()
+        start_of_year = date(year, 1, 1)
+        while start_of_year.weekday() != 0:
+            start_of_year += timedelta(days=1)
+        weeks_since = (today - start_of_year).days // 7
+        period = (weeks_since // 2) + 1
+        period = min(max(1, period), 26)
+        return redirect(url_for('employee.timesheet', period=period))
+
+    days = get_period_dates(period, year)
+    weeks = [days[:7], days[7:]]
+
+    codes = Code.query.all()
+    modifiers = Modifier.query.all()
+
+    # readonly si période passée (à ajuster selon ta logique)
+    today = date.today()
+    periode_debut = days[0]
+    periode_fin = days[-1]
+    readonly = periode_fin < today
+
+    # 1️⃣ SAUVEGARDE DES DONNÉES
+    if request.method == 'POST' and not readonly:
+        for day in days:
+            start = request.form.get(f"start_{day}")
+            end = request.form.get(f"end_{day}")
+            code_id = request.form.get(f"code_{day}")
+
+            if not (start and end and code_id):
+                continue
+
+            ts = Timesheet.query.filter_by(user_id=user.id, date=day).first()
+            if not ts:
+                ts = Timesheet(user_id=user.id, date=day)
+                db.session.add(ts)
+            ts.start_time = start
+            ts.end_time = end
+            ts.code_id = code_id
+            ts.status = 'submitted'
+
         db.session.commit()
+        flash("Feuille de temps sauvegardée.", "success")
+        return redirect(url_for('employee.timesheet', period=period))
 
-        log_audit(
-            action='create',
-            resource='timesheet',
-            resource_id=timesheet.id,
-            details={
-                "date": timesheet.date.strftime('%Y-%m-%d'),
-                "hours": "%.2f" % timesheet.total_hours()
-            }
-        )
-        flash('Feuille de temps enregistrée avec succès')
-        return redirect(url_for('employee.dashboard'))
-        
-    return render_template('employee/timesheet_form.html', 
-                          title='Nouvelle feuille de temps', 
-                          form=form,
-                          current_user=user,
-                          is_edit=False,
-                          timesheet=None)
+    # 2️⃣ PRÉPARATION DES DONNÉES POUR AFFICHAGE
+    timesheet_data = {}
+    for day in days:
+        ts = Timesheet.query.filter_by(user_id=user.id, date=day).first()
+        timesheet_data[day] = ts
 
-@employee_bp.route('/timesheets')
-@role_required('employee')
-def list_timesheets():
-    user = User.query.get(session['user_id'])
-    # Récupérer toutes les feuilles de temps de l'employé
-    timesheets = Timesheet.query.filter_by(user_id=session['user_id']).order_by(Timesheet.date.desc()).all()
-    
-    return render_template('employee/timesheet_list.html', 
-                          title='Mes feuilles de temps', 
-                          current_user=user,
-                          timesheets=timesheets)
+    prev_period = period - 1 if period > 1 else 26
+    next_period = period + 1 if period < 26 else 1
 
-@employee_bp.route('/timesheet/edit/<int:id>', methods=['GET', 'POST'])
-@role_required('employee')
-def edit_timesheet(id):
-    user = User.query.get(session['user_id'])
-    
-    # Récupérer la feuille de temps
-    timesheet = Timesheet.query.get_or_404(id)
-    
-    # Vérifier que la feuille appartient à l'employé connecté
-    if timesheet.user_id != user.id:
-        flash('Vous n\'êtes pas autorisé à modifier cette feuille de temps', 'danger')
-        return redirect(url_for('employee.dashboard'))
-    
-    # Vérifier que la feuille n'est pas déjà approuvée/rejetée
-    if timesheet.status != 'submitted':
-        flash('Cette feuille de temps ne peut plus être modifiée car elle a déjà été traitée', 'warning')
-        return redirect(url_for('employee.list_timesheets'))
-    
-    # Préparer le formulaire
-    form = TimesheetForm(obj=timesheet)
-    
-    if form.validate_on_submit():
-
-        old_values = {
-            "date": timesheet.date.strftime('%Y-%m-%d'),
-            "start_time": timesheet.start_time.strftime('%H:%M'),
-            "end_time": timesheet.end_time.strftime('%H:%M'),
-            "break_duration": timesheet.break_duration,
-            "hours": "%.2f" % timesheet.total_hours()
-        }
-
-        # Mettre à jour les données
-        form.populate_obj(timesheet)
-        db.session.commit()
-
-        new_values = {
-            "date": timesheet.date.strftime('%Y-%m-%d'),
-            "start_time": timesheet.start_time.strftime('%H:%M'),
-            "end_time": timesheet.end_time.strftime('%H:%M'),
-            "break_duration": timesheet.break_duration,
-            "hours": "%.2f" % timesheet.total_hours()
-        }
-
-        log_audit(
-            action='update',
-            resource='timesheet',
-            resource_id=timesheet.id,
-            details={
-                "old": old_values,
-                "new": new_values
-            }
-        )
-        
-        flash('Feuille de temps mise à jour avec succès', 'success')
-        return redirect(url_for('employee.list_timesheets'))
-        
-    return render_template('employee/timesheet_form.html', 
-                          title='Modifier la feuille de temps', 
-                          form=form,
-                          current_user=user,
-                          is_edit=True,
-                          timesheet=timesheet)
+    return render_template(
+        'employee/timesheet.html',
+        period_num=period,
+        weeks=weeks,
+        codes=codes,
+        modifiers=modifiers,
+        week_start=periode_debut,
+        week_end=periode_fin,
+        readonly=readonly,
+        prev_period=prev_period,
+        next_period=next_period,
+        timesheet_data=timesheet_data,
+        current_user=user
+    )
