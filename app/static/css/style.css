@@ -7,7 +7,6 @@ html {
 body {
   background-color: var(--couleur-fond);
   color: var(--couleur-texte);
-  padding-bottom: 2rem;
 }
 
 .navbar {
@@ -36,4 +35,8 @@ body {
 .btn-primary:hover {
   background-color: var(--couleur-accent);
   border-color: var(--couleur-accent);
+}
+
+.container {
+  margin-bottom: 2rem; /* Augmente la marge en bas de la page */
 }
