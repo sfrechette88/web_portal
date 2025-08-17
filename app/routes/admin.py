@@ -687,6 +687,7 @@ def export_complete(format):
 @admin_bp.route('/security/audit-logs')
 @role_required('admin')
 def audit_logs():
+    user = User.query.get(session['user_id'])
     """Affiche les journaux d'audit de sécurité."""
     # Paramètres de filtrage
     page = request.args.get('page', 1, type=int)
@@ -743,6 +744,7 @@ def audit_logs():
                           logs=logs,
                           actions=actions,
                           usernames=usernames,
+                          current_user=user,
                           current_filters={
                               'action': action,
                               'username': username,
