@@ -38,5 +38,5 @@ body {
 }
 
 .container {
-  margin-bottom: 2rem; /* Augmente la marge en bas de la page */
+  margin-bottom: 1.5rem !important; /* Augmente la marge en bas de la page */
 }
