@@ -4,6 +4,8 @@ from flask_migrate import Migrate
 from .config import Config
 import locale
 from babel.dates import format_date
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -17,6 +19,14 @@ def jour_fr(value):
     if not value:
         return ''
     return format_date(value, format="EEEE", locale='fr_FR').capitalize()
+
+def datetime_local(value):
+    if not value:
+        return ''
+    # Convertit le temps UTC en fuseau horaire local (ex: Canada/Eastern)
+    local_tz = ZoneInfo("America/Montreal") # ou "America/Montreal" si plus précis
+    local_dt = value.replace(tzinfo=ZoneInfo("UTC")).astimezone(local_tz)
+    return local_dt.strftime('%d/%m/%Y %H:%M:%S')
 
 def create_app(config_class=Config):
     app = Flask(__name__)
